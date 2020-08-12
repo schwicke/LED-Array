@@ -1,15 +1,26 @@
+/**********************************************************************
+* Filename    : common.c
+* Description : Common methods
+* License     : GPL2
+* Author      : Ulrich Schwickerath, 2020
+**********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
 #include "common.h"
-extern unsigned char *font1[];
-extern unsigned char *font2[];
 
+unsigned char mirror_byte(unsigned char byte){
+  /* returns a mirrored version of byte */
+  byte = (byte & 0xF0) >> 4 | (byte & 0x0F) << 4;
+  byte = (byte & 0xCC) >> 2 | (byte & 0x33) << 2;
+  byte = (byte & 0xAA) >> 1 | (byte & 0x55) << 1;
+  return byte;
+}
 
-// create the display thread
 void create_display_thread(void *display_function) {
+  /* create the display thread */
   pthread_t displaythread;
   int rc = pthread_create(&displaythread, NULL, display_function, (void *) &display_buffer[0]);
   if (rc) {
@@ -19,24 +30,17 @@ void create_display_thread(void *display_function) {
   sleep(1);
 }
 
-void read_character_set(unsigned char *target) {
-  printf("read character rom\n");
-  FILE *fp = fopen("chargen", "rb");
-  size_t rc = fread(target, CHARSET_SIZE, 1, fp);
-  if (rc <= 0) {
-    printf("Failed to open character set file");
-    exit(-1);
-  }
-  fclose(fp);
-}
-
 void write_ascii(unsigned char *buf, unsigned char *source, unsigned int asciicode){
-  memcpy(buf, source + 8 * asciicode, 7);
+  /* render a mirrored character based on its ASCII code */
+  for (int i=0; i<8; i++){
+    unsigned char byte = mirror_byte(*(source + 8 * asciicode + i));
+    *(buf+i) = byte;
+  }
 }
 
 void write_string(int columns, unsigned char *buf, unsigned char *charset, char *text){
-  // for C64 fonts @ is at 0
-  // int offset = (int)'@';
+  /* write a string into a buffer 
+  Note:  int offset = (int)'@'; */
   int offset = 0;
   int flag = 0;
   for (int i = 0; i < columns; i++) {
@@ -52,6 +56,7 @@ void write_string(int columns, unsigned char *buf, unsigned char *charset, char 
 }
 
 void shiftleftonce(int row, int rows, int columns, unsigned char *buf){
+  /* scroll the text left by one bit */
   int i, j;
   int ov[columns];
   

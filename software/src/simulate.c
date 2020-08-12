@@ -1,3 +1,9 @@
+/**********************************************************************
+* Filename    : simulate.c
+* Description : simulate the output on the terminal
+* License     : GPL2
+* Author      : Ulrich Schwickerath, 2020
+**********************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
@@ -42,8 +48,7 @@ int main(void) {
   char textbuffer[LCOLUMNS];
 
   // initialise text
-  //read_character_set(&characterset[0]);
-  memcpy(characterset, font, 2048);
+  memcpy(characterset, font, 1024);
 
   // create the display thread
   create_display_thread(thread_show_buffer_on_terminal);
@@ -55,13 +60,11 @@ int main(void) {
   int copy = COLUMNS*ROWS; // fill the full display buffer
   memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
   for (int i=0;i<strlen(textbuffer)*ROWS;i++){
-    printf("%d %p\n", i, (unsigned char*)large_display_buffer+i*ROWS);
     for (int ii=0;ii<8;ii++){
       for (int jj=0;jj<ROWS;jj++){
-	shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
+        shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
       }
-      //memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer)+i*ROWS, copy);
-      memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+       memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
       sleep(2);
     }
   }
