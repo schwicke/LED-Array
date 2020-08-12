@@ -4,12 +4,4 @@ Just do
 ./autogen.sh 
 ./configure 
 make
-su
-# make install 
-
-Usage example: 
-> lcal "4*atan(1)"
-or
-> lcal 4\*atan\(1)
-
-
+sudo make install 

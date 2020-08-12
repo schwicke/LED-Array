@@ -52,8 +52,7 @@
 #define rowclockPin 28   // block clock pin
 
 
-extern unsigned char *font1[];
-extern unsigned char *font2[];
+extern unsigned char *font[];
 
 unsigned int LOW = 0;
 unsigned int HIGH = 0xffffff;
@@ -234,7 +233,7 @@ main(int argc, char *argv[])
 
   // initialise text
   // read_character_set(&characterset[0]);
-  memcpy(characterset, font1, 2048);
+  memcpy(characterset, font, 2048);
 
   // create the display thread
   create_display_thread(thread_show_buffer_on_led);

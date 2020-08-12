@@ -5,8 +5,7 @@
 #include <unistd.h>
 #include "common.h"
 
-extern unsigned char* font1[];
-extern unsigned char* font2[];
+extern unsigned char* font[];
 
 void show_char(unsigned char x){
   int i;
@@ -44,7 +43,7 @@ int main(void) {
 
   // initialise text
   //read_character_set(&characterset[0]);
-  memcpy(characterset, font2, 2048);
+  memcpy(characterset, font, 2048);
 
   // create the display thread
   create_display_thread(thread_show_buffer_on_terminal);
