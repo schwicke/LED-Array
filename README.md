@@ -12,5 +12,5 @@ This project is in a very early state. Maybe somebody might find it useful.
 The display consist of 504 red LEDs (state of the art mid 80th). The exact specifications got lost.
 
 ## Software
-The driver software is written in C using wiringPi. To test things I added a simulator.
+The driver software is written in C using libgpiod. Check the README.md file in the software folder.
 
