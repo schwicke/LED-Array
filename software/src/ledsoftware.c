@@ -45,11 +45,11 @@ struct gpiod_line *rowclock;
 unsigned char characters[128 * 8];
 
 void delayMicroseconds(int delay){
-  sleep((float)delay/1e6);
+  usleep(delay);
 }
 
 void delay(int delay){
-  sleep((float)delay/1e3);
+  usleep(1000*delay);
 }
 
 void abort(){

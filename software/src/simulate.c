@@ -30,6 +30,7 @@ void * thread_show_buffer_on_terminal(void * buff){
   int nx = ROWS;
   int ny = COLUMNS;
   while (1){
+    printf("\e[1;1H\e[2J");
     for (j=0; j<nx; j++){
       for (i=0; i<ny; i++){
 	unsigned char byte = *(((unsigned char *)buff)+ROWS*i + j);
@@ -37,7 +38,7 @@ void * thread_show_buffer_on_terminal(void * buff){
       }
       printf("\n");
     }
-    sleep(1);
+    usleep(100000);
   }
 }
 
@@ -46,7 +47,7 @@ int main(void) {
   
   unsigned char characterset[CHARSET_SIZE+1];
   char textbuffer[LCOLUMNS];
-
+  int ret;
   // initialise text
   memcpy(characterset, font, 1024);
 
@@ -58,14 +59,17 @@ int main(void) {
   write_string(strlen(textbuffer), (unsigned char*)large_display_buffer, characterset, textbuffer);
   // make a sliding window
   int copy = COLUMNS*ROWS; // fill the full display buffer
-  memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
-  for (int i=0;i<strlen(textbuffer)*ROWS;i++){
-    for (int ii=0;ii<8;ii++){
-      for (int jj=0;jj<ROWS;jj++){
-        shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
+  ret = system("/usr/bin/clear");
+  if (ret == 0){
+    memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+    for (int i=0;i<strlen(textbuffer)*ROWS;i++){
+      for (int ii=0;ii<8;ii++){
+	for (int jj=0;jj<ROWS;jj++){
+	  shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
+	}
+	memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+	usleep(50000);
       }
-       memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
-      sleep(2);
     }
   }
 }
