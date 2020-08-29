@@ -78,3 +78,19 @@ void shiftleftonce(int row, int rows, int columns, unsigned char *buf){
     }
   }
 }
+
+void scroll_in_text(unsigned char *characterset, char* textbuffer){
+  write_string(strlen(textbuffer), (unsigned char*)large_display_buffer, characterset, textbuffer);
+  // make a sliding window
+  int copy = COLUMNS*ROWS; // fill the full display buffer
+  memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+  for (int i=0;i<strlen(textbuffer)*ROWS;i++){
+    for (int ii=0;ii<8;ii++){
+      for (int jj=0;jj<ROWS;jj++){
+	shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
+      }
+      memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+      usleep(50000);
+    }
+  }
+}

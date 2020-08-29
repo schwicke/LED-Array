@@ -56,20 +56,8 @@ int main(void) {
 
   // write some text into the large buffer
   strcpy(textbuffer, "Das Pferd frisst keinen Gurkensalat        ");
-  write_string(strlen(textbuffer), (unsigned char*)large_display_buffer, characterset, textbuffer);
-  // make a sliding window
-  int copy = COLUMNS*ROWS; // fill the full display buffer
   ret = system("/usr/bin/clear");
   if (ret == 0){
-    memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
-    for (int i=0;i<strlen(textbuffer)*ROWS;i++){
-      for (int ii=0;ii<8;ii++){
-	for (int jj=0;jj<ROWS;jj++){
-	  shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char*)large_display_buffer));
-	}
-	memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
-	usleep(50000);
-      }
-    }
+    scroll_in_text(characterset, textbuffer);
   }
 }

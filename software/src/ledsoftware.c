@@ -13,23 +13,18 @@
 #include <gpiod.h>
 #include "common.h"
 
-#ifndef CONSUMER
-#define CONSUMER "LEDband"
-#endif
-
-#define dataPin 1        // DS pin of 74HC595(Pin14)
-#define columnclockPin 5 // CH_CP pin of 74HC595(Pin11)
-#define latchPin 26      // ST_CP pin of 74HC595(Pin12)
-#define clrbarPin 4      // clear pin
-#define fePin 6          // FE pin
-#define rowdataPin 27    // block select pin
-#define rowclockPin 28   // block clock pin
-
+#define dataPin 18        // DS pin of 74HC595(Pin14)
+#define columnclockPin 24 // CH_CP pin of 74HC595(Pin11)
+#define latchPin 12      // ST_CP pin of 74HC595(Pin12)
+#define clrbarPin 23      // clear pin
+#define fePin 25          // FE pin
+#define rowdataPin 16    // block select pin
+#define rowclockPin 20   // block clock pin
 
 extern unsigned char *font[];
 
 unsigned int LOW = 0;
-unsigned int HIGH = 0xffffff;
+unsigned int HIGH = 1;
 
 struct gpiod_chip *chip;
 struct gpiod_line *data;
@@ -64,22 +59,34 @@ void abort(){
   exit(0);
 }
 
-struct gpiod_line * setAsOutput(int pin){
+struct gpiod_line * setAsOutput(int bcm){
   struct gpiod_line *gpio_line;
+  char consumer[7];
   int result;
 
-  gpio_line = gpiod_chip_get_line(chip, pin);
+  gpio_line = gpiod_chip_get_line(chip, bcm);
   if (!gpio_line) {
     gpiod_chip_close(chip);
     perror("Get line failed\n");
     exit(1);
   }
-  result = gpiod_line_request_output(gpio_line, CONSUMER, 0);
+  (void)sprintf(consumer, "out-%-2d", bcm);
+  result = gpiod_line_request_output(gpio_line, consumer, 0);
   if (result < 0) {
     perror("Request line as output failed\n");
     abort();
   }
+  perror(consumer);
   return(gpio_line);
+}
+
+void writeState(struct gpiod_line *line, unsigned int state){
+  int result;
+  result = gpiod_line_set_value(line, state);
+  if (result < 0){
+    perror("Set line output failed\n");
+    abort();
+  }
 }
 
 void init_hardware()
@@ -98,72 +105,54 @@ void init_hardware()
   fe = setAsOutput(fePin);
   rowdata = setAsOutput(rowdataPin);
   rowclock = setAsOutput(rowclockPin);
-}
-
-void writeState(struct gpiod_line *line, unsigned int state){
-  int result;
-  result = gpiod_line_set_value(line, state);
-  if (result < 0){
-    perror("Set line output failed\n");
-    abort();
-  }
+  // enable demultiplexer
+  writeState(fe, 1);
+  // reset shift registers
+  writeState(clrbar, 0);
+  delayMicroseconds(2);
+  writeState(clrbar, 1);
+  delayMicroseconds(2);
 }
 
 void out_byte(struct gpiod_line * dLine, struct gpiod_line * cLine, int val){
   int i;
   for (i = 0; i < 8; i++) {
-    writeState(cLine, LOW);
-    writeState(dLine, ((0x80 & (val << i)) == 0x80) ? HIGH : LOW);
-    delayMicroseconds(10);
-    writeState(cLine, HIGH);
-    delayMicroseconds(10);
+    writeState(cLine, 0);
+    writeState(dLine, ((0x80 & (val << i)) == 0x80) ? 1 : 0);
+    delayMicroseconds(2);
+    writeState(cLine, 1);
+    delayMicroseconds(2);
   }
 }
 
 void out_byte_lsb(struct gpiod_line * dLine, struct gpiod_line * cLine, int val){
   int i;
   for (i = 0; i < 8; i++) {
-    writeState(cLine, LOW);
-    writeState(dLine, ((0x1 & (val >> i)) == 0x1) ? HIGH : LOW);
-    delayMicroseconds(10);
-    writeState(cLine, HIGH);
-    delayMicroseconds(10);
-  }
-}
-
-void out_byte_watch(struct gpiod_line * dLine, struct gpiod_line * cLine, struct gpiod_line * lLine, int val){
-  int i;
-  for (i = 0; i < 8; i++) {
-    writeState(cLine, LOW);
-    writeState(dLine, ((0x80 & (val << i)) == 0x80) ? HIGH : LOW);
-    delayMicroseconds(10);
-    writeState(cLine, HIGH);
-    delayMicroseconds(10);
-    writeState(lLine, HIGH);
-    delayMicroseconds(10);
-    writeState(lLine, LOW);
-    delay(500);
+    writeState(cLine, 0);
+    writeState(dLine, ((0x1 & (val >> i)) == 0x1) ? 1 : 0);
+    delayMicroseconds(2);
+    writeState(cLine, 1);
+    delayMicroseconds(2);
   }
 }
 
 void switch_off(){
   // disable demultiplexer
-  writeState(fe, LOW);
+  writeState(fe, 1);
   // reset shift registers
-  writeState(clrbar, LOW);
-  delayMicroseconds(10);
-  writeState(clrbar, HIGH);
-  delayMicroseconds(10);
+  writeState(clrbar, 0);
+  delayMicroseconds(2);
+  writeState(clrbar, 1);
 }
 
-void * thread_show_buffer_on_led(void *buffer){
+void thread_show_buffer_on_led(void *buffer){
   int             nx = ROWS;
   int             ny = COLUMNS;
   int             i, j;
   unsigned char   x;
   int             block, inside, pos;
   unsigned char  *buff = (unsigned char *) buffer;
-  writeState(latch, LOW);
+  writeState(latch, 0);
   while (1) {
     for (j = 0; j < nx; j++) {
       for (i = 0; i < ny; i++) {
@@ -175,9 +164,10 @@ void * thread_show_buffer_on_led(void *buffer){
 	if (inside == 2) {
 	  x = j + 8 * block;
 	  out_byte(rowdata, rowclock, x);
-	  writeState(latch, HIGH);
-	  delayMicroseconds(50);
-	  writeState(latch, LOW);
+	  writeState(latch, 1);
+	  delayMicroseconds(2);
+	  writeState(latch, 0);
+	  delayMicroseconds(10);
 	}
       }
     }
@@ -190,7 +180,6 @@ int main(int argc, char *argv[]) {
 
   // initialise the hardware
   init_hardware();
-
   // initialise text
   // read_character_set(&characterset[0]);
   memcpy(characterset, font, 2048);
@@ -199,26 +188,7 @@ int main(int argc, char *argv[]) {
   create_display_thread(thread_show_buffer_on_led);
 
   // write some text into the large buffer
-  strcpy(textbuffer, "        Hello, World !!!       ");
-  write_string(strlen(textbuffer), (unsigned char *) large_display_buffer, characterset, textbuffer);
-
-  // make a sliding window
-  int             copy = COLUMNS * ROWS;	// fill the full display buffer
-
-  for (int replay = 0; replay < 3; replay++) {
-    // initialize the text
-    write_string(strlen(textbuffer), (unsigned char *) large_display_buffer, characterset, textbuffer);
-    memcpy((unsigned char *) display_buffer, ((unsigned char *) large_display_buffer), copy);
-    for (int i = 0; i < strlen(textbuffer); i++) {
-      for (int ii = 0; ii < 8; ii++) {
-	for (int jj = 0; jj < ROWS; jj++) {
-	  shiftleftonce(jj, ROWS, LCOLUMNS, ((unsigned char *)large_display_buffer));
-	}
-	memcpy((unsigned char *) display_buffer, ((unsigned char *) large_display_buffer), copy);
-	delayMicroseconds(50000);
-      }
-    }
-  }
-  switch_off();
+  strcpy(textbuffer, "Das ist das Haus vom Nikolaus");
+  scroll_in_text(characterset, textbuffer);
   abort();
 }
