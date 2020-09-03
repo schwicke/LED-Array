@@ -55,7 +55,7 @@ void abort(){
   gpiod_line_release(fe);
   gpiod_line_release(rowdata);
   gpiod_line_release(rowclock);
-  gpiod_chip_close(chip);
+  //gpiod_chip_close(chip);
   exit(0);
 }
 
@@ -76,7 +76,6 @@ struct gpiod_line * setAsOutput(int bcm){
     perror("Request line as output failed\n");
     abort();
   }
-  perror(consumer);
   return(gpio_line);
 }
 
@@ -109,9 +108,7 @@ void init_hardware()
   writeState(fe, 1);
   // reset shift registers
   writeState(clrbar, 0);
-  delayMicroseconds(2);
   writeState(clrbar, 1);
-  delayMicroseconds(2);
 }
 
 void out_byte(struct gpiod_line * dLine, struct gpiod_line * cLine, int val){
@@ -119,9 +116,7 @@ void out_byte(struct gpiod_line * dLine, struct gpiod_line * cLine, int val){
   for (i = 0; i < 8; i++) {
     writeState(cLine, 0);
     writeState(dLine, ((0x80 & (val << i)) == 0x80) ? 1 : 0);
-    delayMicroseconds(2);
     writeState(cLine, 1);
-    delayMicroseconds(2);
   }
 }
 
@@ -130,9 +125,7 @@ void out_byte_lsb(struct gpiod_line * dLine, struct gpiod_line * cLine, int val)
   for (i = 0; i < 8; i++) {
     writeState(cLine, 0);
     writeState(dLine, ((0x1 & (val >> i)) == 0x1) ? 1 : 0);
-    delayMicroseconds(2);
     writeState(cLine, 1);
-    delayMicroseconds(2);
   }
 }
 
@@ -141,7 +134,6 @@ void switch_off(){
   writeState(fe, 1);
   // reset shift registers
   writeState(clrbar, 0);
-  delayMicroseconds(2);
   writeState(clrbar, 1);
 }
 
@@ -165,9 +157,7 @@ void thread_show_buffer_on_led(void *buffer){
 	  x = j + 8 * block;
 	  out_byte(rowdata, rowclock, x);
 	  writeState(latch, 1);
-	  delayMicroseconds(2);
 	  writeState(latch, 0);
-	  delayMicroseconds(10);
 	}
       }
     }

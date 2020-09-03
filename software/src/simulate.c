@@ -55,7 +55,7 @@ int main(void) {
   create_display_thread(thread_show_buffer_on_terminal);
 
   // write some text into the large buffer
-  strcpy(textbuffer, "Das Pferd frisst keinen Gurkensalat        ");
+  strcpy(textbuffer, "Das Pferd frisst keinen Gurkensalat");
   ret = system("/usr/bin/clear");
   if (ret == 0){
     scroll_in_text(characterset, textbuffer);
