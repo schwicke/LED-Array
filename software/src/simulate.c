@@ -43,11 +43,14 @@ void * thread_show_buffer_on_terminal(void * buff){
 }
 
 
-int main(void) {
-  
+int main(int argc, char *argv[]) {
+
   unsigned char characterset[CHARSET_SIZE+1];
   char textbuffer[LCOLUMNS];
-  int ret;
+  if (argc<=1){
+    printf("Please give the text to be displayed\n");
+    exit(1);
+  }
   // initialise text
   memcpy(characterset, font, 1024);
 
@@ -55,9 +58,6 @@ int main(void) {
   create_display_thread(thread_show_buffer_on_terminal);
 
   // write some text into the large buffer
-  strcpy(textbuffer, "Das Pferd frisst keinen Gurkensalat");
-  ret = system("/usr/bin/clear");
-  if (ret == 0){
-    scroll_in_text(characterset, textbuffer);
-  }
+  strncpy(textbuffer, argv[1], LCOLUMNS);
+  scroll_in_text(characterset, textbuffer);
 }

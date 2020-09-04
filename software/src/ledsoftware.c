@@ -168,6 +168,14 @@ int main(int argc, char *argv[]) {
   unsigned char   characterset[CHARSET_SIZE + 1];
   char            textbuffer[LCOLUMNS];
 
+  if (argc<=1){
+    printf("Please give the text to be displayed\n");
+    exit(1);
+  }
+  printf("%s", argv[0]);
+  printf("%s", argv[1]);
+  strncpy(textbuffer, argv[1], LCOLUMNS);
+
   // initialise the hardware
   init_hardware();
   // initialise text
@@ -178,7 +186,6 @@ int main(int argc, char *argv[]) {
   create_display_thread(thread_show_buffer_on_led);
 
   // write some text into the large buffer
-  strcpy(textbuffer, "Das ist das Haus vom Nikolaus");
   scroll_in_text(characterset, textbuffer);
   abort();
 }
