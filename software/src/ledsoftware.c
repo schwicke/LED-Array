@@ -186,6 +186,6 @@ int main(int argc, char *argv[]) {
   create_display_thread(thread_show_buffer_on_led);
 
   // write some text into the large buffer
-  scroll_in_text(characterset, textbuffer);
+  scroll_in_text(characterset, textbuffer, 5);
   abort();
 }

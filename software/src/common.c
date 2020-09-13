@@ -79,13 +79,14 @@ void shiftleftonce(int row, int rows, int columns, unsigned char *buf){
   }
 }
 
-void scroll_in_text(unsigned char *characterset, char* textbuffer){
+void scroll_in_text(unsigned char *characterset, char* textbuffer, int wait){
   char * new_textbuffer = (char *) malloc(strlen(textbuffer)+18);
   sprintf(new_textbuffer, "         %s         ", textbuffer);
   write_string(strlen(new_textbuffer), (unsigned char*)large_display_buffer, characterset, new_textbuffer);
   // make a sliding window
   int copy = COLUMNS*ROWS; // fill the full display buffer
   memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
+  int nchars=0;
   for (int i=0;i<strlen(new_textbuffer);i++){
     for (int ii=0;ii<8;ii++){
       for (int jj=0;jj<ROWS;jj++){
@@ -93,6 +94,11 @@ void scroll_in_text(unsigned char *characterset, char* textbuffer){
       }
       memcpy((unsigned char*)display_buffer, ((unsigned char*)large_display_buffer), copy);
       usleep(50000);
+    }
+    nchars ++;
+    if (nchars==9){
+      sleep(wait);
+      nchars=0;
     }
   }
   free(new_textbuffer);

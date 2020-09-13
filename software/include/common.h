@@ -21,5 +21,5 @@ void create_display_thread (void* display_function);
 /* shift left once: row to shift, rows=number of rows, columns is number of columns */
 void shiftleftonce(int row, int rows, int columns, unsigned char *buf);
 /* scroll in the given text */
-void scroll_in_text(unsigned char *characterset, char* textbuffer);
+void scroll_in_text(unsigned char *characterset, char* textbuffer, int wait);
 #endif
