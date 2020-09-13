@@ -81,6 +81,7 @@ void shiftleftonce(int row, int rows, int columns, unsigned char *buf){
 
 void scroll_in_text(unsigned char *characterset, char* textbuffer, int wait){
   char * new_textbuffer = (char *) malloc(strlen(textbuffer)+18);
+  memset(new_textbuffer, 0, strlen(textbuffer)+18);
   sprintf(new_textbuffer, "         %s         ", textbuffer);
   write_string(strlen(new_textbuffer), (unsigned char*)large_display_buffer, characterset, new_textbuffer);
   // make a sliding window
