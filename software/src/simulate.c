@@ -59,5 +59,5 @@ int main(int argc, char *argv[]) {
 
   // write some text into the large buffer
   strncpy(textbuffer, argv[1], LCOLUMNS-1);
-  scroll_in_text(characterset, textbuffer, 5);
+  scroll_in_text(characterset, textbuffer, 2);
 }
