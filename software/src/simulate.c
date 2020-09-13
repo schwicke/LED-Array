@@ -58,6 +58,6 @@ int main(int argc, char *argv[]) {
   create_display_thread(thread_show_buffer_on_terminal);
 
   // write some text into the large buffer
-  strncpy(textbuffer, argv[1], LCOLUMNS);
+  strncpy(textbuffer, argv[1], LCOLUMNS-1);
   scroll_in_text(characterset, textbuffer);
 }

@@ -174,7 +174,7 @@ int main(int argc, char *argv[]) {
   }
   printf("%s", argv[0]);
   printf("%s", argv[1]);
-  strncpy(textbuffer, argv[1], LCOLUMNS);
+  strncpy(textbuffer, argv[1], LCOLUMNS-1);
 
   // initialise the hardware
   init_hardware();
