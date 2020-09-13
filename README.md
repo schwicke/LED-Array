@@ -12,8 +12,10 @@ Maybe somebody might find it interesting. Here's an example of how it looks like
 
 ![Hello You example](hello_you.png)
 
-## Hardware
+## [Hardware](hardware/README.md)
 The display consist of 504 red LEDs (state of the art mid 80th). The exact specifications of the LEDs got lost. It's organised in 3 blocks of 7 rows and 24 (or 3x8) columns each. More details can be found in the hardware folder.
 
-## Software
-The driver software is written in C using libgpiod. Check the README.md file in the software folder.
+## [Software](software/README.md)
+The driver software is written in C using libgpiod. Check the [README](software/README.md) file in 
+the software folder. For now, only text scroll-in is implemented. To ease up code development, a simulator has been added.
+
